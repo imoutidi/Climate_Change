@@ -1,6 +1,7 @@
 import webhoseio
 import pymongo
 import time
+from datetime import date
 from clientDF import DiffbotClient
 
 action = input("Do you want to make a new request?(Y/N): ")
@@ -61,8 +62,10 @@ client = pymongo.MongoClient()
 # Database name is minedNews
 db = client.climate_change
 # Collection name (db Table)
-db.climate_articles
-
+# db.climate_articles
+current_date = str(date.today().year) + "-" + str(date.today().month) + "-" + \
+              str(date.today().day)
+weekCollection = db[current_date]
 
 # using i to keep track the news with the corresponding urls
 i = 0
@@ -97,14 +100,14 @@ for url in urlList:
             siteName = response['objects'][0]['siteName']
 
         # Checking if an article already exist in collection
-        findResp = db.climate_articles.find_one({"url": url})
+        findResp = weekCollection .find_one({"url": url})
 
         # responses that have no text are not saved into the db
         # for some reason diffbot does not identifies the text
         # even though the article does have text
         if text != '' and str(findResp) == "None":
             print("Inserting entry")
-            db.climate_articles.insert({"url": url, "author": author,
+            weekCollection.insert({"url": url, "author": author,
                                    "title": title, "text": text, "date": date,
                                    "siteName": siteName})
         elif text == '':
